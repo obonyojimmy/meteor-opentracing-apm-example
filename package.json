@@ -2,11 +2,18 @@
   "name": "meteor-opentracing-apm-example",
   "private": true,
   "scripts": {
-    "start": "meteor --no-release-check --settings ./config/settings.development.json",
+    "start": "meteor --no-release-check --settings ./config/settings.development.json --port 3040",
     "lint": "eslint --quiet --ext .jsx --ext .js ./imports"
   },
   "dependencies": {
     "@babel/runtime": "^7.8.3",
+    "@opentelemetry/api": "^0.7.0",
+    "@opentelemetry/core": "^0.7.0",
+    "@opentelemetry/exporter-jaeger": "^0.7.0",
+    "@opentelemetry/node": "^0.7.0",
+    "@opentelemetry/plugin-http": "^0.7.0",
+    "@opentelemetry/tracing": "^0.7.0",
+    "bcrypt": "^4.0.1",
     "classnames": "^2.2.6",
     "core-js": "^3.6.4",
     "graphql": "^14.5.8",
