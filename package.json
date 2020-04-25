@@ -12,6 +12,7 @@
     "@opentelemetry/exporter-jaeger": "^0.7.0",
     "@opentelemetry/node": "^0.7.0",
     "@opentelemetry/plugin-http": "^0.7.0",
+    "@opentelemetry/plugin-mongodb": "^0.6.1",
     "@opentelemetry/tracing": "^0.7.0",
     "bcrypt": "^4.0.1",
     "classnames": "^2.2.6",

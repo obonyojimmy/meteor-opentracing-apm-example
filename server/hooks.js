@@ -35,7 +35,6 @@ Meteor.server.method_handlers = Object.entries(originalMethods)
         span.setAttribute('connectionId', id);
 
         try {
-          span.addEvent(`invoking ${name}`);
           const res = handler.apply(this, arguments);
 
           const userId = Meteor.userId();
@@ -44,10 +43,10 @@ Meteor.server.method_handlers = Object.entries(originalMethods)
 
             span.setAttribute('userId', userId);
             if (profile) {
-              span.setAttribute('userProfile', profile);
+              span.setAttribute('userProfile', JSON.stringify(profile));
             }
             if (emails) {
-              span.setAttribute('userEmails', emails);
+              span.setAttribute('userEmails', JSON.stringify(emails));
             }
 
           }
@@ -56,7 +55,8 @@ Meteor.server.method_handlers = Object.entries(originalMethods)
           return res;
         } catch (error) {
           const userId = Meteor.userId();
-          const { message /* stack */ } = error;
+          const { message } = error;
+          span.addEvent('error', { userId, name, message });
           console.log({ userId, name, message });
           span.end();
           throw error;

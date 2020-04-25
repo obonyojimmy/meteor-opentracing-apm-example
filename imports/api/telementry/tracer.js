@@ -12,7 +12,16 @@ import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
     // port: 6832,
   };
 
-  const provider = new NodeTracerProvider({ logLevel: LogLevel.ERROR });
+  const provider = new NodeTracerProvider({
+    logLevel: LogLevel.ERROR,
+    plugins: {
+      mongodb: {
+        enabled: true,
+        // You may use a package name or absolute path to the file.
+        path: '@opentelemetry/plugin-mongodb',
+      },
+    },
+   });
 
   const exporter = new JaegerExporter(jaegerOptions);
 
