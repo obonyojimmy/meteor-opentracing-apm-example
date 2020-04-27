@@ -5,7 +5,7 @@ import { NodeTracerProvider } from '@opentelemetry/node';
 import { BatchSpanProcessor } from '@opentelemetry/tracing';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 
- function initTracer(serviceName) {
+function initTracer(serviceName) {
   const jaegerOptions = {
     serviceName: serviceName,
     // host: process.env.JAEGER_HOST,
@@ -29,7 +29,8 @@ import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 
   provider.register();
 
-  const tracer = opentelemetry.trace.getTracer(serviceName);
+  // const tracer = opentelemetry.trace.getTracer(serviceName);
+  const tracer = provider.getTracer(serviceName);
 
   return { tracer, exporter };
 }

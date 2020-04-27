@@ -1,10 +1,12 @@
 import { Meteor } from 'meteor/meteor';
+import { CanonicalCode } from '@opentelemetry/api';
 import { tracer, exporter } from './tracing';
 
 let connectedSpans = [];
 
 Meteor.onConnection(function (connection) {
-  const { id, onClose, clientAddress } = connection;
+  const { id, onClose, clientAddress, httpHeaders } = connection;
+  console.log(httpHeaders);
 
   // start trace-spans
   const mainSpan = tracer.startSpan('connected');
@@ -56,8 +58,18 @@ Meteor.server.method_handlers = Object.entries(originalMethods)
         } catch (error) {
           const userId = Meteor.userId();
           const { message } = error;
+
+          span.setAttribute('errorMsg', message);
           span.addEvent('error', { userId, name, message });
-          console.log({ userId, name, message });
+
+          switch (name) {
+            case 'login':
+              span.setStatus(CanonicalCode.UNAUTHENTICATED);
+              break;
+            default:
+              break;
+          }
+          // console.log({ userId, name, message });
           span.end();
           throw error;
         }
