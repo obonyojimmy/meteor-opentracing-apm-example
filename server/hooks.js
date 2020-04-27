@@ -31,8 +31,13 @@ Meteor.server.method_handlers = Object.entries(originalMethods)
       [name]: function () {
         const { connection: { id } } = this;
 
-        const parentSpan = connectedSpans.find(s => s.id === id);
-        const span = tracer.startSpan(`Method::${name}`, { parent: parentSpan.span, kind: 1 });
+        // const parentSpan = connectedSpans.find(s => s.id === id);
+        const parentSpan = tracer.getCurrentSpan();
+        console.log(parentSpan);
+        const span = tracer.startSpan(`Method::${name}`, {
+          // parent: parentSpan.span,
+          kind: 1,
+        });
 
         span.setAttribute('connectionId', id);
 

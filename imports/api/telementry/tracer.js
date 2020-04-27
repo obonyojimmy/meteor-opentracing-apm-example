@@ -14,13 +14,6 @@ function initTracer(serviceName) {
 
   const provider = new NodeTracerProvider({
     logLevel: LogLevel.ERROR,
-    plugins: {
-      mongodb: {
-        enabled: true,
-        // You may use a package name or absolute path to the file.
-        path: '@opentelemetry/plugin-mongodb',
-      },
-    },
    });
 
   const exporter = new JaegerExporter(jaegerOptions);
