@@ -1,29 +1,65 @@
-import { CanonicalCode } from '@opentelemetry/api';
+import { CanonicalCode, Context, defaultGetter, TraceFlags } from '@opentelemetry/api';
+import { HttpTraceContext, setExtractedSpanContext, getExtractedSpanContext } from '@opentelemetry/core';
 import register from './provider';
 
 const Provider = {};
-
 
 // Initialize Provider on server startUp
 Meteor.startup(() => {
   const { TRACE_SERVICE_NAME } = process.env;
   const provider = register(TRACE_SERVICE_NAME);
-Provider.tracer = provider.getTracer(TRACE_SERVICE_NAME);
+  Provider.tracer = provider.getTracer(TRACE_SERVICE_NAME);
+  // console.log(provider.extract);
 });
 
 // Hook to Server COnnection
 Meteor.onConnection(function (connection) {
   const { id, onClose, clientAddress, httpHeaders } = connection;
-  console.log(connection);
+  console.log(httpHeaders['x-real-ip']);
 
+  /* const extractCarrier = {
+    traceparent: httpHeaders['x-real-ip'],
+  };
+  const propagator = new HttpTraceContext();
+  const context = propagator.extract(Context.ROOT_CONTEXT, extractCarrier, defaultGetter);
+  */
+  /* const extractedSpanContext = {
+    traceId: 'b8d520a61ee69ea2',
+    spanId: 'cec4eb61f1ae33a9',
+    traceFlags: '1',
+  }; */
+
+  const carrier = httpHeaders['x-real-ip'].split(':');
+  /* const extractedSpanContext = {
+    traceId: carrier[2],
+    spanId: carrier[1],
+    traceFlags: carrier[3],
+  }; */
+  const context = {
+    traceId: carrier[2],
+    spanId: carrier[1],
+    // traceFlags: TraceFlags.SAMPLED,
+    isRemote: true
+  };
+  //console.log(extractedSpanContext);
+  // const context = getExtractedSpanContext(setExtractedSpanContext(Context.ROOT_CONTEXT, extractedSpanContext));
+  console.log(context);
+  const spanOptions = {
+    kind: 1,
+    parent: context,
+    // links: [{ context: context }],
+  };
   // start trace-spans
-  const mainSpan = Provider.tracer.startSpan('connected');
+  const mainSpan = Provider.tracer.startSpan('connected', spanOptions);
   mainSpan.setAttribute('clientAddress', clientAddress);
   mainSpan.setAttribute('connectionId', id);
 
   onClose(function () {
+    // TODO: Use Metrics Api to Measure how long the user is connected
     mainSpan.end();
   });
+
+  // mainSpan.end();
 });
 
 // Mutate Methods to include Trace Spans automatically
