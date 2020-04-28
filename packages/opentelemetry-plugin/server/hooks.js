@@ -1,42 +1,45 @@
-import { Meteor } from 'meteor/meteor';
 import { CanonicalCode } from '@opentelemetry/api';
-import { tracer, exporter } from './tracing';
+import register from './provider';
 
-let connectedSpans = [];
+const Provider = {};
 
+
+// Initialize Provider on server startUp
+Meteor.startup(() => {
+  const { TRACE_SERVICE_NAME } = process.env;
+  const provider = register(TRACE_SERVICE_NAME);
+Provider.tracer = provider.getTracer(TRACE_SERVICE_NAME);
+});
+
+// Hook to Server COnnection
 Meteor.onConnection(function (connection) {
   const { id, onClose, clientAddress, httpHeaders } = connection;
-  console.log(httpHeaders);
+  console.log(connection);
 
   // start trace-spans
-  const mainSpan = tracer.startSpan('connected');
-  connectedSpans.push({ id, span: mainSpan });
-
+  const mainSpan = Provider.tracer.startSpan('connected');
   mainSpan.setAttribute('clientAddress', clientAddress);
   mainSpan.setAttribute('connectionId', id);
 
   onClose(function () {
     mainSpan.end();
-    connectedSpans = connectedSpans.filter(s => s.id !== id);
-    // exporter.shutdown();
   });
 });
 
+// Mutate Methods to include Trace Spans automatically
 const originalMethods = Meteor.server.method_handlers;
-
 Meteor.server.method_handlers = Object.entries(originalMethods)
   .reduce(function (prev, [name, handler]) {
     return {
       ...prev,
       [name]: function () {
         const { connection: { id } } = this;
-
         // const parentSpan = connectedSpans.find(s => s.id === id);
-        const parentSpan = tracer.getCurrentSpan();
-        console.log(parentSpan);
-        const span = tracer.startSpan(`Method::${name}`, {
-          // parent: parentSpan.span,
+        // const parentSpan = Provider.tracer.getCurrentSpan();
+       //  console.log(parentSpan);
+        const span = Provider.tracer.startSpan(`Method::${name}`, {
           kind: 1,
+          // parent: parentSpan.span,
         });
 
         span.setAttribute('connectionId', id);
@@ -46,16 +49,14 @@ Meteor.server.method_handlers = Object.entries(originalMethods)
 
           const userId = Meteor.userId();
           if (userId) {
-            const { profile, emails } = Meteor.user();
-
             span.setAttribute('userId', userId);
+            const { profile, emails } = Meteor.user();
             if (profile) {
               span.setAttribute('userProfile', JSON.stringify(profile));
             }
             if (emails) {
               span.setAttribute('userEmails', JSON.stringify(emails));
             }
-
           }
 
           span.end();
@@ -74,7 +75,6 @@ Meteor.server.method_handlers = Object.entries(originalMethods)
             default:
               break;
           }
-          // console.log({ userId, name, message });
           span.end();
           throw error;
         }
