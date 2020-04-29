@@ -1,0 +1,22 @@
+receivers:
+  otlp:
+    endpoint: 0.0.0.0:55678
+
+exporters:
+  #zipkin:
+  #  url: "http://zipkin-all-in-one:9411/api/v2/spans"
+  logging:
+  jaeger_grpc:
+    endpoint: 0.0.0.0:14250
+
+processors:
+  batch:
+  queued_retry:
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      #exporters: [zipkin]
+      exporters: [logging, jaeger_grpc]
+      processors: [batch, queued_retry] 

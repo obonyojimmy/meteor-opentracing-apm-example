@@ -7,7 +7,7 @@ import {
 } from '@opentelemetry/tracing';
 import { DocumentLoad } from '@opentelemetry/plugin-document-load';
 import { ZoneContextManager } from '@opentelemetry/context-zone';
-// import { CollectorExporter } from '@opentelemetry/exporter-collector';
+import { CollectorExporter } from '@opentelemetry/exporter-collector';
 // import { LightstepExporter } from 'lightstep-opentelemetry-exporter';
 import { ConsoleSpanExporter } from './exporter';
 
@@ -15,7 +15,8 @@ import { ConsoleSpanExporter } from './exporter';
 
 function MeteorTraceProvider(serviceName) {
   const collectorOptions = {
-    url: 'http://localhost:14268',
+    serviceName: 'basic-service',
+    // url: '127.0.0.1:55678',
   };
 
   // Create a provider for activating and tracking spans
@@ -33,8 +34,8 @@ function MeteorTraceProvider(serviceName) {
       }),
     ),
   ); */
-  // const exporter = new CollectorExporter(collectorOptions);
-  // tracerProvider.addSpanProcessor(new SimpleSpanProcessor(exporter));
+  const exporter = new CollectorExporter(collectorOptions);
+  tracerProvider.addSpanProcessor(new SimpleSpanProcessor(exporter));
 
   // Register the tracer
   tracerProvider.register({
