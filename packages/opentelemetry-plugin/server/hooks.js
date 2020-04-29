@@ -1,5 +1,5 @@
 import { CanonicalCode, Context, defaultGetter, TraceFlags } from '@opentelemetry/api';
-import { HttpTraceContext, setExtractedSpanContext, getExtractedSpanContext } from '@opentelemetry/core';
+// import { HttpTraceContext, setExtractedSpanContext, getExtractedSpanContext } from '@opentelemetry/core';
 import register from './provider';
 
 const Provider = {};
@@ -39,15 +39,14 @@ Meteor.onConnection(function (connection) {
     traceId: carrier[2],
     spanId: carrier[1],
     // traceFlags: TraceFlags.SAMPLED,
-    isRemote: true
+    isRemote: true,
   };
-  //console.log(extractedSpanContext);
-  // const context = getExtractedSpanContext(setExtractedSpanContext(Context.ROOT_CONTEXT, extractedSpanContext));
+  // const linkContext = { traceId: carrier[2], spanId: carrier[1]};
   console.log(context);
   const spanOptions = {
     kind: 1,
     parent: context,
-    // links: [{ context: context }],
+    // links: [{ context: linkContext }],
   };
   // start trace-spans
   const mainSpan = Provider.tracer.startSpan('connected', spanOptions);

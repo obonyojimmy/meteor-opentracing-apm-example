@@ -2,10 +2,14 @@
 // import opentelemetry from '@opentelemetry/api';
 import { LogLevel } from '@opentelemetry/core';
 import { NodeTracerProvider } from '@opentelemetry/node';
-import { BatchSpanProcessor } from '@opentelemetry/tracing';
+import { BatchSpanProcessor, SimpleSpanProcessor } from '@opentelemetry/tracing';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
+// import { LightstepExporter } from 'lightstep-opentelemetry-exporter';
+
+// const lightStepToken = Meteor.settings.public.lightStepToken;
 
 function register(serviceName) {
+  
   const jaegerOptions = {
     serviceName: serviceName,
   };
@@ -16,7 +20,14 @@ function register(serviceName) {
    });
 
   provider.addSpanProcessor(new BatchSpanProcessor(exporter));
-
+  /* provider.addSpanProcessor(
+    new SimpleSpanProcessor(
+      new LightstepExporter({
+        serviceName: serviceName,
+        token: lightStepToken,
+      }),
+    ),
+  ); */
   provider.register();
 
   // const tracer = provider.getTracer(serviceName);
