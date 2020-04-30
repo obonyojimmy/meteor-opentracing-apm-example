@@ -2,7 +2,7 @@
 // import opentelemetry from '@opentelemetry/api';
 import { LogLevel } from '@opentelemetry/core';
 import { NodeTracerProvider } from '@opentelemetry/node';
-import { BatchSpanProcessor, SimpleSpanProcessor } from '@opentelemetry/tracing';
+import { BatchSpanProcessor, SimpleSpanProcessor, ConsoleSpanExporter } from '@opentelemetry/tracing';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 // import { LightstepExporter } from 'lightstep-opentelemetry-exporter';
 
@@ -13,21 +13,15 @@ function register(serviceName) {
   const jaegerOptions = {
     serviceName: serviceName,
   };
-  const exporter = new JaegerExporter(jaegerOptions);
+  // const exporter = new JaegerExporter(jaegerOptions);
 
   const provider = new NodeTracerProvider({
     logLevel: LogLevel.ERROR,
    });
 
-  provider.addSpanProcessor(new BatchSpanProcessor(exporter));
-  /* provider.addSpanProcessor(
-    new SimpleSpanProcessor(
-      new LightstepExporter({
-        serviceName: serviceName,
-        token: lightStepToken,
-      }),
-    ),
-  ); */
+  // provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+  provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
+  
   provider.register();
 
   // const tracer = provider.getTracer(serviceName);

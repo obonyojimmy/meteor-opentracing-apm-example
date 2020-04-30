@@ -2,14 +2,12 @@ import { CanonicalCode, Context, defaultGetter, TraceFlags } from '@opentelemetr
 // import { HttpTraceContext, setExtractedSpanContext, getExtractedSpanContext } from '@opentelemetry/core';
 import register from './provider';
 
-const Provider = {};
+TraceProvider = {};
 
 // Initialize Provider on server startUp
 Meteor.startup(() => {
   const { TRACE_SERVICE_NAME } = process.env;
-  const provider = register(TRACE_SERVICE_NAME);
-  Provider.tracer = provider.getTracer(TRACE_SERVICE_NAME);
-  // console.log(provider.extract);
+  TraceProvider.tracer = register(TRACE_SERVICE_NAME).getTracer(TRACE_SERVICE_NAME);
 });
 
 // Hook to Server COnnection
@@ -49,7 +47,7 @@ Meteor.onConnection(function (connection) {
     // links: [{ context: linkContext }],
   };
   // start trace-spans
-  const mainSpan = Provider.tracer.startSpan('connected', spanOptions);
+  const mainSpan = TraceProvider.tracer.startSpan('connected', spanOptions);
   mainSpan.setAttribute('clientAddress', clientAddress);
   mainSpan.setAttribute('connectionId', id);
 
@@ -72,7 +70,7 @@ Meteor.server.method_handlers = Object.entries(originalMethods)
         // const parentSpan = connectedSpans.find(s => s.id === id);
         // const parentSpan = Provider.tracer.getCurrentSpan();
        //  console.log(parentSpan);
-        const span = Provider.tracer.startSpan(`Method::${name}`, {
+        const span = TraceProvider.tracer.startSpan(`Method::${name}`, {
           kind: 1,
           // parent: parentSpan.span,
         });
@@ -80,6 +78,7 @@ Meteor.server.method_handlers = Object.entries(originalMethods)
         span.setAttribute('connectionId', id);
 
         try {
+          // eslint-disable-next-line prefer-rest-params
           const res = handler.apply(this, arguments);
 
           const userId = Meteor.userId();

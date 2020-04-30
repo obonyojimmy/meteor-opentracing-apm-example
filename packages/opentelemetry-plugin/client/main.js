@@ -9,9 +9,4 @@ checkNpmVersions({
   '@opentelemetry/context-zone': '^0.7.0',
 }, 'opentelemetry-plugin');
 
-const meteorTraceProvider = require('./tracer.js');
-
-console.log(meteorTraceProvider);
-meteorTraceProvider.default('Frontend');
-
-// export default MeteorTraceProvider;
+require('./hooks.js');
