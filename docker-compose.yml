@@ -1,0 +1,12 @@
+meteor:
+  image: ulexus/meteor
+  ports:
+    - "80:80"
+  links:
+    - mongo
+  environment:
+    - ROOT_URL=http://192.168.59.103
+mongo:
+  image: mongo
+  ports:
+    - "27017:27017"
